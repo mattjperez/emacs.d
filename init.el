@@ -65,6 +65,9 @@
   (mac-command-modifier 'meta)
   (mac-option-modifier 'super)
 
+  ;; TAB cycle if only few candidates
+  (setq completion-cycle-threshold 3)
+
   ;; Sideline custom.el per no-littering
   (custom-file (no-littering-expand-etc-file-name "custom.el"))
 
@@ -115,18 +118,17 @@
   (global-auto-revert-mode +1)
 
   ;; global line numbers
-  (global-display-line-numbers-mode +1)
+  (global-display-line-numbers-mode +1))
 
   ;; Inconsolata-16 as the default
   ;; TODO: Can this go into the `solarized` use-pacakge below?
-  (add-to-list 'default-frame-alist '(font . "Inconsolata-16")))
+  ;; (add-to-list 'default-frame-alist '(font . "Inconsolata-16")))
 
 
 ;;
 ;; Get some theme in there, and other UI stuff
 ;;
 (use-package gruvbox-theme
-  ;;:ensure solarized-theme
   :defer t
   :init
   (load-theme 'gruvbox-dark-medium t))
@@ -305,7 +307,7 @@
 ;;
 (use-package corfu
   :custom
-  (corfu-auto t)
+  (corfu-cycle t) ;; enable cycling for `corfu-next/previous`
   :init
   (global-corfu-mode)
   :bind
@@ -331,6 +333,7 @@
 ;; Load magit, projectile, fly[check,spell], compile, etc. as key programming configs.
 ;;
 (use-package magit
+  ;; (setq magit-blame-echo-style 'headings)
   :bind (("s-m m" . magit-status)
          ("s-m j" . magit-dispatch)
          ("s-m k" . magit-file-dispatch)
