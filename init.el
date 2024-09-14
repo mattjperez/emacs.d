@@ -52,6 +52,10 @@
   (auto-compile-on-load-mode))
 
 
+(require 'exec-path-from-shell)
+(exec-path-from-shell-initialize)
+
+
 ;;
 ;; Use use-package for emacs configurations
 ;;
@@ -121,11 +125,11 @@
 ;;
 ;; Get some theme in there, and other UI stuff
 ;;
-(use-package solarized
-  :ensure solarized-theme
+(use-package gruvbox-theme
+  ;;:ensure solarized-theme
   :defer t
   :init
-  (load-theme 'solarized-dark t))
+  (load-theme 'gruvbox-dark-medium t))
 
 (use-package diff-hl
   :hook ((dired-mode . diff-hl-dired-mode)
