@@ -52,7 +52,10 @@
 
 
 (require 'exec-path-from-shell)
-(exec-path-from-shell-initialize)
+(when (memq window-system '(mac ns x))
+  (exec-path-from-shell-initialize))
+(when (daemonp)
+  (exec-path-from-shell-initialize))
 
 
 ;;
