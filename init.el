@@ -1,3 +1,8 @@
+;; Activate debugging.
+;(setq debug-on-error t
+;      debug-on-signal nil
+;      debug-on-quit nil)
+
 ;; elpaca bootstrap program
 (defvar elpaca-installer-version 0.8)
 (defvar elpaca-directory (expand-file-name "elpaca/" no-littering-var-directory))
@@ -38,14 +43,13 @@
 (add-hook 'after-init-hook #'elpaca-process-queues)
 (elpaca `(,@elpaca-order))
 
-;; enable elpaca support for use-package's :ensure keyword
+;; enable elpaca support for use-package
+;; use :ensure t to enable elpaca use-package support
+;; use :ensure nil to prevent elpaca from loading built-ins
 (elpaca elpaca-use-package
 	(elpaca-use-package-mode))
 
-
-
-;; set package download 
-;;(setq straight-base-dir (expand-file-name "straight/" no-littering-var-directory))
+;; set package download
 (use-package no-littering
   :demand
   :ensure t
@@ -56,11 +60,16 @@
   (no-littering-theme-backups))
 
 ;; set custom.el, init after elpaca
-(setq custom-file (expand-file-name "custom.el" user-emacs-directory))
-(add-hook 'elpaca-after-init-hook (lambda () (load custom-file 'noerror)))
+;(setq custom-file (expand-file-name "custom.el" user-emacs-directory))
+;(add-hook 'elpaca-after-init-hook (lambda () (load custom-file 'noerror)))
 
 (use-package emacs
   :ensure nil
+  :init
+  (setq user-full-name "Matthew J Perez"
+      user-mail-address "matt@mperez.io")
+  (setq custom-file (expand-file-name "custom.el" user-emacs-directory))
+  :hook (elpaca-after-init-hook . (lambda () (load custom-file 'noerror)))
   :custom
   (inhibit-startup-screen t)
   (tab-always-indent 'complete)
@@ -68,6 +77,7 @@
   (require-final-newline t)
   (uniquify-buffer-name-style 'post-forward)
   (uniquify-separator "|")
+  (auto-save-default nil)
   :config
   (tool-bar-mode 0)
   (scroll-bar-mode 0)
@@ -101,27 +111,27 @@
 ;;;
 (use-package gruvbox-theme
   :ensure t
-  ;:defer t
+  :demand t
   :config
   (load-theme 'gruvbox-dark-medium t))
 (use-package diminish
   :ensure t
   )
-
 ;; must install icons, all-the-icons-install-fonts
 ;(use-package all-the-icons
 ;  :if (display-graphic-p))
 ;(use-package all-the-icons-dired
 ;  :if (display-graphic-p)
 ;  )
+(use-package solaire-mode
+  :ensure t
+  :functions solaire-global-mode
+  :config
+  (solaire-global-mode))
 
-;(use-package solaire-mode
-;  :config
-;  (solaire-global-mode))
-
-
+;;;
 ;;; Completion (General)
-
+;;;
 ;; dynamic abbreviation
 (use-package dabbrev
   ;; Swap M-/ and C-M-/
@@ -149,16 +159,11 @@
   :init
   (vertico-mode +1)
   (vertico-multiform-mode +1)
+  :defines vertico-multiform-categories
   :config
   (add-to-list 'vertico-multiform-categories '(embark-keybinding grid))
   :custom
   (enable-recursive-minibuffers t))
-;(use-package vertico-posframe
-;  :init
-;  (vertico-posframe-mode)
-;  :after (vertico)
-;  )
-
 
 ;; backend completion functions
 (use-package consult
@@ -206,6 +211,8 @@
          :map vertico-map
          ("C-x C-d" . consult-dir)
          ("C-x C-j" . consult-dir-jump-file))
+  :functions (tramp-container--completion-function my/consult-dir--tramp-container-hosts)
+  :defines (tramp-docker-program consult-dir-sources)
   :custom
   (consult-dir-project-list-function 'consult-dir-projectile-dirs)
   :init
@@ -228,6 +235,7 @@
 
 (use-package consult-projectile
   :after (consult projectile)
+  :defines projectile-mode-map
   :bind
   (:map projectile-mode-map
         ("s-p f" . consult-projectile)))
@@ -247,6 +255,8 @@
    ("s-]" . embark-collect)
    ("s-}" . embark-export)
    ("C-h B" . embark-bindings))
+  :defines avy-ring avy-dispatch-alist
+  :functions ring-ref
   :init
   (setq prefix-help-command #'embark-prefix-help-command)
   ;; From https://karthinks.com/software/avy-can-do-anything/
@@ -294,28 +304,27 @@
         ("s-SPC" . corfu-insert-separator)
         ("C-p" . corfu-previous)
         ))
-
-;; backend completion functions, similar to consult
-(use-package cape
-  ;; Bind prefix keymap providing all Cape commands under a mnemonic key.
-  ;; Press C-c p ? to for help.
-  :bind ("C-c p" . cape-prefix-map) ;; Alternative key: M-<tab>, M-p, M-+
-  ;; Alternatively bind Cape commands individually.
-  ;; :bind (("C-c p d" . cape-dabbrev)
-  ;;        ("C-c p h" . cape-history)
-  ;;        ("C-c p f" . cape-file)
-  ;;        ...)
-  :init
-  ;; Add to the global default value of `completion-at-point-functions' which is
-  ;; used by `completion-at-point'.  The order of the functions matters, the
-  ;; first function returning a result wins.  Note that the list of buffer-local
-  ;; completion functions takes precedence over the global list.
-  (add-hook 'completion-at-point-functions #'cape-dabbrev)
-  (add-hook 'completion-at-point-functions #'cape-file)
-  (add-hook 'completion-at-point-functions #'cape-elisp-block)
-  ;; (add-hook 'completion-at-point-functions #'cape-history)
-  ;; ...
-  )
+;; ;; backend completion functions, similar to consult
+;; (use-package cape
+;;   ;; Bind prefix keymap providing all Cape commands under a mnemonic key.
+;;   ;; Press C-c p ? to for help.
+;;   :bind ("C-c p" . cape-prefix-map) ;; Alternative key: M-<tab>, M-p, M-+
+;;   ;; Alternatively bind Cape commands individually.
+;;   ;; :bind (("C-c p d" . cape-dabbrev)
+;;   ;;        ("C-c p h" . cape-history)
+;;   ;;        ("C-c p f" . cape-file)
+;;   ;;        ...)
+;;   :init
+;;   ;; Add to the global default value of `completion-at-point-functions' which is
+;;   ;; used by `completion-at-point'.  The order of the functions matters, the
+;;   ;; first function returning a result wins.  Note that the list of buffer-local
+;;   ;; completion functions takes precedence over the global list.
+;;   (add-hook 'completion-at-point-functions #'cape-dabbrev)
+;;   (add-hook 'completion-at-point-functions #'cape-file)
+;;   (add-hook 'completion-at-point-functions #'cape-elisp-block)
+;;   ;; (add-hook 'completion-at-point-functions #'cape-history)
+;;   ;; ...
+;;   )
 
 
 
@@ -370,32 +379,11 @@
 
 
 ;;;
-;;; Extras
+;;; Misc
 ;;;
-;;
-;; Load magit, projectile, fly[check,spell], compile, etc. as key programming configs.
-;;
-  (use-package transient
-    :demand t
-    :ensure (:branch "main")
-    )
-(use-package magit
-  :ensure (:branch "main")
-  :after (transient)
-  ;; (setq magit-blame-echo-style 'headings)
-  :bind (("s-m m" . magit-status)
-         ("s-m j" . magit-dispatch)
-         ("s-m k" . magit-file-dispatch)
-         ("s-m l" . magit-log-buffer)
-         ("s-m b" . magit-blame)))
-
 (use-package treemacs
   :ensure t
   :defer t)
-
-;(use-package treemacs-evil
-;  :after (treemacs evil)
-;  :ensure t)
 
 (use-package treemacs-projectile
   :after (treemacs projectile)
@@ -470,16 +458,33 @@
   (sp-base-key-bindings 'sp))
 
 (use-package eldoc
+  :ensure nil
   :diminish eldoc-mode)
 
 
-;;
-;; Programming modes, tree-sitter, LSP
-;;
+;;;
+;;; Magit
+;;;
+(use-package transient
+  :ensure (:branch "main" :wait t))
+(use-package magit
+  :ensure (:branch "main")
+  :after (transient)
+  ;; (setq magit-blame-echo-style 'headings)
+  :bind (("s-m m" . magit-status)
+         ("s-m j" . magit-dispatch)
+         ("s-m k" . magit-file-dispatch)
+         ("s-m l" . magit-log-buffer)
+         ("s-m b" . magit-blame)))
+
+;;;
+;;; Treesitter, syntax highlighting
+;;;
 (use-package treesit-auto
   :ensure t
   :custom
   (treesit-auto-install 'prompt)
+  :functions (treesit-auto-add-to-auto-mode-alist global-treesit-auto-mode)
   :config
   (treesit-auto-add-to-auto-mode-alist 'all)
   (global-treesit-auto-mode))
@@ -497,7 +502,9 @@
   :custom
   (rustic-cargo-use-last-stored-arguments t))
 
-
+;;;
+;;; LSP
+;;;
 (use-package lsp-mode
   :ensure t
   :custom
@@ -550,7 +557,8 @@
 
 (use-package yasnippet
   :ensure t
-  :init (add-hook 'prog-mode-hook #'yas-minor-mode)
+  :hook (prog-mode-hook . yas-minor-mode)
+  :functions yas-reload-all
   :config (yas-reload-all))
 
 (use-package yasnippet-snippets
@@ -563,7 +571,9 @@
 
 
 ;;
-;; Other configuration
+;; Other Programs
 ;;
 (use-package ereader
   :ensure t)
+
+

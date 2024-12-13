@@ -6,6 +6,7 @@
 ;; bringing up package/use-package/no-littering
 (defvar no-littering-etc-directory (expand-file-name ".cache/etc/" user-emacs-directory))
 (defvar no-littering-var-directory (expand-file-name ".cache/var/" user-emacs-directory))
+(setq package-user-dir (expand-file-name "elpa/" no-littering-var-directory))
 
 ;; redirect native-compilation files to no-littering folder
 (when (and (fboundp 'startup-redirect-eln-cache)
