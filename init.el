@@ -47,7 +47,14 @@
 ;; use :ensure t to enable elpaca use-package support
 ;; use :ensure nil to prevent elpaca from loading built-ins
 (elpaca elpaca-use-package
-	(elpaca-use-package-mode))
+  (elpaca-use-package-mode))
+
+(use-package exec-path-from-shell
+  :demand t
+  :ensure t
+  :config
+  (setq exec-path-from-shell-variables '("PATH"))
+  (exec-path-from-shell-initialize))
 
 ;; set package download
 (use-package no-littering
@@ -106,6 +113,9 @@
 
   (global-display-line-numbers-mode +1))
 
+(use-package org
+  :mode (("\\.org$" . org-mode)))
+
 ;;;
 ;;; Theme and UI
 ;;;
@@ -129,6 +139,9 @@
   :config
   (solaire-global-mode))
 
+;(use-package golden-ratio
+;  :ensure t)
+;
 ;;;
 ;;; Completion (General)
 ;;;
@@ -381,17 +394,17 @@
 ;;;
 ;;; Misc
 ;;;
-(use-package treemacs
-  :ensure t
-  :defer t)
+;; (use-package treemacs
+;;   :ensure t
+;;   :defer t)
 
-(use-package treemacs-projectile
-  :after (treemacs projectile)
-  :ensure t)
+;; (use-package treemacs-projectile
+;;   :after (treemacs projectile)
+;;   :ensure t)
 
-(use-package treemacs-icons-dired
-  :hook (dired-mode . treemacs-icons-dired-enable-once)
-  :ensure t)
+;; (use-package treemacs-icons-dired
+;;   :hook (dired-mode . treemacs-icons-dired-enable-once)
+;;   :ensure t)
 
 ;(use-package treemacs-magit
 ;  :after (treemacs magit)
@@ -448,6 +461,10 @@
   (compilation-max-output-line-length nil)
   (compilation-skip-threshold 0))
 
+(use-package ansi-color
+  :ensure nil
+  :hook (compilation-filter . ansi-color-compilation-filter))
+
 (use-package smartparens
   :ensure t
   :diminish smartparens-mode
@@ -480,6 +497,30 @@
 ;;;
 ;;; Treesitter, syntax highlighting
 ;;;
+
+
+(use-package treesit
+  :ensure nil
+  :config
+  (setq treesit-language-source-alist
+   '((bash "https://github.com/tree-sitter/tree-sitter-bash")
+     (cmake "https://github.com/uyha/tree-sitter-cmake")
+     (css "https://github.com/tree-sitter/tree-sitter-css")
+     (elisp "https://github.com/Wilfred/tree-sitter-elisp")
+     (go "https://github.com/tree-sitter/tree-sitter-go")
+     (html "https://github.com/tree-sitter/tree-sitter-html")
+     (javascript "https://github.com/tree-sitter/tree-sitter-javascript" "master" "src")
+     (json "https://github.com/tree-sitter/tree-sitter-json")
+     (make "https://github.com/alemuller/tree-sitter-make")
+     (markdown "https://github.com/ikatyang/tree-sitter-markdown")
+     (python "https://github.com/tree-sitter/tree-sitter-python")
+     (toml "https://github.com/tree-sitter/tree-sitter-toml")
+     (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
+     (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
+     (yaml "https://github.com/ikatyang/tree-sitter-yaml")
+     (latex "https://github.com/latex-lsp/tree-sitter-latex")
+     )))
+  
 (use-package treesit-auto
   :ensure t
   :custom
@@ -576,4 +617,11 @@
 (use-package ereader
   :ensure t)
 
+(use-package vterm
+  :ensure t)
 
+(use-package geiser-mit
+  :ensure t)
+
+(use-package geiser-guile
+  :ensure t)
