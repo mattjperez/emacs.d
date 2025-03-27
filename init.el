@@ -139,9 +139,10 @@
   :config
   (solaire-global-mode))
 
-;(use-package golden-ratio
-;  :ensure t)
-;
+(use-package golden-ratio
+  :ensure t
+  :init
+  (golden-ratio-mode))
 ;;;
 ;;; Completion (General)
 ;;;
@@ -181,10 +182,9 @@
 ;; backend completion functions
 (use-package consult
   :ensure t
-  :after (projectile vertico)
+  :after (vertico)
   :custom
   (consult-narrow-key "<")
-  (consult-project-function (lambda (_) (projectile-project-root)))
   :bind (("C-x b" . consult-buffer)
          ("C-x 4 b" . consult-buffer-other-window)
          ("C-x 5 b" . consult-buffer-other-frame)
@@ -226,8 +226,6 @@
          ("C-x C-j" . consult-dir-jump-file))
   :functions (tramp-container--completion-function my/consult-dir--tramp-container-hosts)
   :defines (tramp-docker-program consult-dir-sources)
-  :custom
-  (consult-dir-project-list-function 'consult-dir-projectile-dirs)
   :init
   (defun my/consult-dir--tramp-container-hosts ()
       (cl-loop for (id name) in (tramp-container--completion-function tramp-docker-program)
@@ -245,13 +243,6 @@
   :config
   (add-to-list 'consult-dir-sources 'consult-dir--source-tramp-ssh t)
   (add-to-list 'consult-dir-sources 'my/consult-dir--source-tramp-container t))
-
-(use-package consult-projectile
-  :after (consult projectile)
-  :defines projectile-mode-map
-  :bind
-  (:map projectile-mode-map
-        ("s-p f" . consult-projectile)))
 
 ;; annotations
 (use-package marginalia
@@ -350,13 +341,13 @@
   :config
   (which-key-mode +1))
 
-(use-package undo-tree
-  :ensure t
-  :diminish
-  :custom
-  (undo-tree-auto-save-history t)
-  :config
-  (global-undo-tree-mode +1))
+;(use-package undo-tree
+;  :ensure t
+;  :diminish
+;  :custom
+;  (undo-tree-auto-save-history t)
+;  :config
+;  (global-undo-tree-mode +1))
 
 ;;;
 ;;; Navigation
@@ -412,15 +403,6 @@
 ;  :config
 ;  (treemacs-start-on-boot)
 ;  )
-
-(use-package projectile
-  :ensure t
-  :init
-  (projectile-mode +1)
-  :bind (:map projectile-mode-map
-              ("s-p" . projectile-command-map))
-  :custom
-  (projectile-per-project-compilation-buffer t))
 
 (use-package rg
   :ensure t)
@@ -542,6 +524,12 @@
   (setq rustic-format-on-save nil)
   :custom
   (rustic-cargo-use-last-stored-arguments t))
+
+(use-package lsp-pyright
+  :ensure t
+  :init
+  (setq lsp-pyright-langserver-command "basedpyright")
+  )
 
 ;;;
 ;;; LSP
